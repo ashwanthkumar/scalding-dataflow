@@ -1,14 +1,17 @@
 package in.ashwanthkumar.scaldingdataflow
 
+import cascading.flow.FlowDef
 import com.google.cloud.dataflow.sdk.PipelineResult.State
-import com.google.cloud.dataflow.sdk.runners.{TransformTreeNode, AggregatorValues, PipelineRunner}
-import com.google.cloud.dataflow.sdk.transforms.{PTransform, Aggregator}
+import com.google.cloud.dataflow.sdk.runners.{AggregatorValues, PipelineRunner, TransformTreeNode}
+import com.google.cloud.dataflow.sdk.transforms.{Aggregator, PTransform}
 import com.google.cloud.dataflow.sdk.values.PValue
 import com.google.cloud.dataflow.sdk.{Pipeline, PipelineResult}
+import com.twitter.scalding.{Args, Job, Mode}
 import org.slf4j.LoggerFactory
 
 class ScaldingResult extends PipelineResult {
   override def getAggregatorValues[T](aggregator: Aggregator[_, T]): AggregatorValues[T] = ???
+  // We're always blocking
   override def getState: State = State.DONE
 }
 
@@ -29,8 +32,14 @@ class LocalScaldingRunner(name: String) extends PipelineRunner[ScaldingResult] {
   private val LOG = LoggerFactory.getLogger(classOf[LocalScaldingRunner])
 
   override def run(pipeline: Pipeline): ScaldingResult = {
-    println(pipeline)
-    pipeline.traverseTopologically(new Evaluator(SContext.local("init")))
+    val ctx = SContext.local("init")
+    pipeline.traverseTopologically(new Evaluator(ctx))
+
+    new Job(Args("")) {
+      override implicit def mode: Mode = ctx.mode
+      override protected implicit val flowDef: FlowDef = ctx.flowDef
+    }.run
+
     new ScaldingResult
   }
 }

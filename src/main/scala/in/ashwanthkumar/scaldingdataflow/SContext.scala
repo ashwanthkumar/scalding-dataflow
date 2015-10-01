@@ -5,9 +5,9 @@ import cascading.pipe.Pipe
 import com.twitter.scalding.{Hdfs, Local, Mode, Test}
 import org.apache.hadoop.conf.Configuration
 
-case class SContext(pipe: Pipe,
-                    // Needed to construct the Pipe in Scalding Job
-                    flowDef: FlowDef, mode: Mode)
+case class SContext(pipe: Pipe, flowDef: FlowDef, mode: Mode) {
+  def apply(transformed: Pipe) = this.copy(pipe = transformed)
+}
 
 object SContext {
   def local(name: String) = SContext(new Pipe(name), FlowDef.flowDef(), Local(false))
