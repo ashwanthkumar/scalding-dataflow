@@ -9,6 +9,7 @@ Scalding Runner for Google Dataflow SDK. This project is a WIP.
 - [ ] groupBy
 
 ### IO
+- [x] Text
 - [ ] Avro
 - [ ] Parquet
 - [ ] Custom Cascading Scheme
