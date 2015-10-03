@@ -35,9 +35,10 @@ class LocalScaldingRunner(name: String) extends PipelineRunner[ScaldingResult] {
     val ctx = SContext.local("init")
     pipeline.traverseTopologically(new Evaluator(ctx))
 
-    new Job(Args("")) {
+    new Job(Args(Iterable())) {
       override implicit def mode: Mode = ctx.mode
       override protected implicit val flowDef: FlowDef = ctx.flowDef
+      override def name: String = ctx.name
     }.run
 
     new ScaldingResult
