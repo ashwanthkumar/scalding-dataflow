@@ -69,6 +69,10 @@ abstract public class ScaldingContextWrapper<Input, Output> extends DoFn<Input, 
         throw new UnsupportedOperationException(message);
     }
 
+    @Override
+    public void outputWithTimestamp(Output output, Instant timestamp) {
+        output(output);
+    }
 
     @Override
     public WindowingInternals<Input, Output> windowingInternals() {
@@ -80,7 +84,9 @@ abstract public class ScaldingContextWrapper<Input, Output> extends DoFn<Input, 
             }
 
             @Override
-            public void outputWindowedValue(Output output, Instant timestamp, Collection<? extends BoundedWindow> windows, PaneInfo pane) {}
+            public void outputWindowedValue(Output output, Instant timestamp, Collection<? extends BoundedWindow> windows, PaneInfo pane) {
+                output(output);
+            }
 
             @Override
             public TimerInternals timerInternals() {

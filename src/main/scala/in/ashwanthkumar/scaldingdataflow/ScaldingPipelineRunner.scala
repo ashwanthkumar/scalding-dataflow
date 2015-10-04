@@ -18,6 +18,7 @@ class ScaldingResult extends PipelineResult {
 
 class Evaluator(var ctx: SContext) extends Pipeline.PipelineVisitor {
   override def visitTransform(node: TransformTreeNode): Unit = {
+//    println(node.getTransform.getName)
     val transform: PTransform[_, _] = node.getTransform
     val applied: AppliedPTransform[_, _, PTransform[_, _]] = AppliedPTransform
       .of(node.getFullName, node.getInput, node.getOutput, transform.asInstanceOf[PTransform[PInput, POutput]]).asInstanceOf[AppliedPTransform[_, _, PTransform[_, _]]]
@@ -37,8 +38,8 @@ class ScaldingPipelineRunner(options: ScaldingPipelineOptions) extends PipelineR
   override def run(pipeline: Pipeline): ScaldingResult = {
 
     val ctx = options.getMode match {
-      case "local" => SContext.local(options.getName)
-      case "hdfs" => SContext.hdfs(options.getName)
+      case "local" => SContext.local(options.getName, options)
+      case "hdfs" => SContext.hdfs(options.getName, options)
     }
 
     pipeline.traverseTopologically(new Evaluator(ctx))
