@@ -75,7 +75,7 @@ object Build extends Build {
 
 object Dependencies {
 
-  val scalding = "com.twitter" % "scalding-core_2.10" % "0.14.0"
+  val scalding = "com.twitter" % "scalding-core_2.10" % "0.15.0"
   val dataflow = "com.google.cloud.dataflow" % "google-cloud-dataflow-java-sdk-all" % "1.1.0"
   val hadoopClient = "org.apache.hadoop" % "hadoop-client" % "2.6.0-mr1-cdh5.4.4"
   val scalaTest = "org.scalatest" %% "scalatest" % "2.2.0" % "test"
