@@ -19,5 +19,5 @@ object Main extends App {
   }))
     .apply(TextIO.Write.to("out.txt").named("Sink"))
 
-  ScaldingRunner.local("init").run(pipeline)
+  ScaldingPipelineRunner.local("init").run(pipeline)
 }
