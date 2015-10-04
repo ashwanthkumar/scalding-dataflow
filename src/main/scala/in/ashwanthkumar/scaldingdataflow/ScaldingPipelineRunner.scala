@@ -40,6 +40,8 @@ class ScaldingPipelineRunner(options: ScaldingPipelineOptions) extends PipelineR
     val ctx = options.getMode match {
       case "local" => SContext.local(options.getName, options)
       case "hdfs" => SContext.hdfs(options.getName, options)
+      case _ =>
+        throw new RuntimeException("--mode has to be one of local or hdfs")
     }
 
     pipeline.traverseTopologically(new Evaluator(ctx))
