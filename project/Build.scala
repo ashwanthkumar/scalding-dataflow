@@ -3,7 +3,13 @@ import sbt.Keys._
 import scala.collection.JavaConversions._
 
 object Build extends Build {
-  val AppVersion = System.getenv().getOrElse("GO_PIPELINE_LABEL", "1.0.0-SNAPSHOT")
+  val AppVersion = {
+    System.getenv().getOrElse("SNAP_PIPELINE_COUNTER", "1.0.0-SNAPSHOT") match {
+      // FIXME - Remove the "SNAPSHOT" suffix once we're ready to make releases
+      case v if !v.endsWith("SNAPSHOT") => "1.0." + v + "-SNAPSHOT"
+      case v => v
+    }
+  }
   val ScalaVersion = "2.10.4"
 
   lazy val main = Project("scalding-dataflow", file("."), settings = defaultSettings ++ publishSettings)
