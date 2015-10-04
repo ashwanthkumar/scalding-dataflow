@@ -20,18 +20,50 @@ object Build extends Build {
   override val settings = super.settings ++ Seq(
     fork in run := false,
     parallelExecution in This := false,
-    publishMavenStyle := true,
-    crossPaths := true,
-    publishArtifact in Test := false,
-    publishArtifact in(Compile, packageDoc) := false,
-    // publishing the main sources jar
-    publishArtifact in(Compile, packageSrc) := true,
 
     // Custom resolvers
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += "Conjars" at "http://conjars.org/repo",
     resolvers += "Cloudera" at "https://repository.cloudera.com/cloudera/public"
   )
+
+  lazy val publishSettings = xerial.sbt.Sonatype.sonatypeSettings ++ Seq(
+    mappings in (Compile, packageBin) ~= (_.filterNot{case (file, _) => file.isDirectory && file.getName == "kinglear.txt"}),
+    publishMavenStyle := true,
+    publishArtifact in Test := false,
+    publishArtifact in(Compile, packageDoc) := true,
+    publishArtifact in(Compile, packageSrc) := true,
+    publishTo <<= version { (v: String) =>
+      val nexus = "https://oss.sonatype.org/"
+      if (v.trim.endsWith("SNAPSHOT"))
+        Some("snapshots" at nexus + "content/repositories/snapshots")
+      else
+        Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+    },
+    pomExtra := _pomExtra
+  )
+
+  val _pomExtra =
+    <url>http://github.com/ashwanthkumar/scalding-dataflow</url>
+      <licenses>
+        <license>
+          <name>Apache License, Version 2.0</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+      <scm>
+        <url>git@github.com:ashwanthkumar/scalding-dataflow.git</url>
+        <connection>scm:git:git@github.com:ashwanthkumar/scalding-dataflow.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>ashwanthkumar</id>
+          <name>Ashwanth Kumar</name>
+          <url>http://www.ashwanthkumar.in/</url>
+        </developer>
+      </developers>
+
 }
 
 object Dependencies {
