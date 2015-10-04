@@ -4,6 +4,8 @@
 Scalding Runner for Google Dataflow SDK. This project is a WIP, try it at your own risk.
 
 ## Usage
+Pass the following options to the program when running it - `--runner=ScaldingPipelineRunner --name=Main-Test --mode=local`
+
 ### Running in Local mode (verified)
 ```scala
 val withOptions = PipelineOptionsFactory.fromArgs(Array()).create()
