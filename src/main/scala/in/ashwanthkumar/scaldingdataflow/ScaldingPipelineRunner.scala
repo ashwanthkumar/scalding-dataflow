@@ -4,8 +4,8 @@ import cascading.flow.FlowDef
 import com.google.cloud.dataflow.sdk.PipelineResult.State
 import com.google.cloud.dataflow.sdk.options.PipelineOptions
 import com.google.cloud.dataflow.sdk.runners.{AggregatorValues, PipelineRunner, TransformTreeNode}
-import com.google.cloud.dataflow.sdk.transforms.{Aggregator, PTransform}
-import com.google.cloud.dataflow.sdk.values.PValue
+import com.google.cloud.dataflow.sdk.transforms.{AppliedPTransform, Aggregator, PTransform}
+import com.google.cloud.dataflow.sdk.values.{POutput, PInput, PValue}
 import com.google.cloud.dataflow.sdk.{Pipeline, PipelineResult}
 import com.twitter.scalding.{Args, Job, Mode}
 import org.slf4j.LoggerFactory
@@ -19,8 +19,10 @@ class ScaldingResult extends PipelineResult {
 class Evaluator(var ctx: SContext) extends Pipeline.PipelineVisitor {
   override def visitTransform(node: TransformTreeNode): Unit = {
     val transform: PTransform[_, _] = node.getTransform
+    val applied: AppliedPTransform[_, _, PTransform[_, _]] = AppliedPTransform
+      .of(node.getFullName, node.getInput, node.getOutput, transform.asInstanceOf[PTransform[PInput, POutput]]).asInstanceOf[AppliedPTransform[_, _, PTransform[_, _]]]
     val evalutor: TransformEvaluator[PTransform[_, _]] = Translator.get(transform.getClass).asInstanceOf[TransformEvaluator[PTransform[_, _]]]
-    ctx = evalutor.evaluate(transform, ctx)
+    ctx = evalutor.evaluate(applied, transform, ctx)
   }
   override def leaveCompositeTransform(node: TransformTreeNode): Unit = {}
   override def enterCompositeTransform(node: TransformTreeNode): Unit = {
