@@ -70,11 +70,6 @@ abstract public class ScaldingContextWrapper<Input, Output> extends DoFn<Input, 
     }
 
     @Override
-    public void outputWithTimestamp(Output output, Instant timestamp) {
-        output(output);
-    }
-
-    @Override
     public WindowingInternals<Input, Output> windowingInternals() {
         return new WindowingInternals<Input, Output>() {
             @Override
