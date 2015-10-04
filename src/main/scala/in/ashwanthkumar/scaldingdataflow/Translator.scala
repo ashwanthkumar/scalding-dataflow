@@ -2,8 +2,9 @@ package in.ashwanthkumar.scaldingdataflow
 
 import com.google.cloud.dataflow.sdk.io.TextIO.Read.{Bound => RBound}
 import com.google.cloud.dataflow.sdk.io.TextIO.Write.{Bound => WBound}
-import com.google.cloud.dataflow.sdk.transforms.{PTransform, ParDo}
+import com.google.cloud.dataflow.sdk.transforms.{DoFn, PTransform, ParDo}
 import com.twitter.scalding._
+import scala.collection.JavaConverters._
 
 object Translator {
 
@@ -29,16 +30,22 @@ object Translator {
     }
   }
 
-  def map[I, O]() = new TransformEvaluator[ParDo.Bound[I, O]] {
-    override def evaluate(transform: ParDo.Bound[I, O], ctx: SContext): SContext = {
-      // TODO - Add Implementation for ParDo
-      ctx.apply(ctx.pipe)
-    }
+  def flatMap[I, O]() = new TransformEvaluator[ParDo.Bound[I, O]] {
+    override def evaluate(transform: ParDo.Bound[I, O], ctx: SContext): SContext = ctx.apply(ctx.pipe.flatMapTo('record -> 'record) {
+      input: I => {
+        val context  = new ProcessContext[I, O](transform.getFn, input)
+        transform.getFn.startBundle(context.asInstanceOf[DoFn[I, O]#Context])
+        transform.getFn.processElement(context.asInstanceOf[DoFn[I, O]#ProcessContext])
+        transform.getFn.finishBundle(context.asInstanceOf[DoFn[I, O]#Context])
+        context.getOutput.asScala
+      }
+    })
   }
 
   private val EVALUATORS: Map[Class[_ <: PTransform[_, _]], TransformEvaluator[_]] = Map(
     classOf[RBound[_]] -> readText(),
-    classOf[WBound[_]] -> writeText()
+    classOf[WBound[_]] -> writeText(),
+    classOf[ParDo.Bound[_, _]] -> flatMap()
   )
 
   def has[PT <: PTransform[_, _]](clazz: Class[PT]) = EVALUATORS.contains(clazz)

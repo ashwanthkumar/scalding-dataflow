@@ -12,12 +12,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class PCtxWrapper<Input, Output> extends ScaldingContextWrapper<Input, Output> {
-    private final static Logger LOG = LoggerFactory.getLogger(PCtxWrapper.class);
+public class ProcessContext<Input, Output> extends ScaldingContextWrapper<Input, Output> {
+    private final static Logger LOG = LoggerFactory.getLogger(ProcessContext.class);
 
     private List<Output> outputs = Lists.newArrayList();
 
-    public PCtxWrapper(DoFn<Input, Output> fn, Input element) {
+    public ProcessContext(DoFn<Input, Output> fn, Input element) {
         super(fn, element);
     }
 
