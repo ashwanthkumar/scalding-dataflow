@@ -6,7 +6,10 @@ import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory
 import com.google.cloud.dataflow.sdk.transforms.{DoFn, Filter, ParDo}
 
 object Main extends App {
-  val withOptions = PipelineOptionsFactory.fromArgs(Array()).create()
+  val withOptions = PipelineOptionsFactory
+    .fromArgs(args)
+    .withValidation()
+    .create()
   val pipeline = Pipeline.create(withOptions)
   pipeline
     .apply(TextIO.Read.from("kinglear.txt").named("Source"))
@@ -19,5 +22,5 @@ object Main extends App {
   }))
     .apply(TextIO.Write.to("out.txt").named("Sink"))
 
-  ScaldingPipelineRunner.local("init").run(pipeline)
+  pipeline.run()
 }

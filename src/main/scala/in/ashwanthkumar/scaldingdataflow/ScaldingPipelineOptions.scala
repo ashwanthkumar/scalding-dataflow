@@ -1,10 +1,17 @@
 package in.ashwanthkumar.scaldingdataflow
 
+import com.google.cloud.dataflow.sdk.options.Validation.Required
 import com.google.cloud.dataflow.sdk.options.{Default, Description, PipelineOptions}
 
 trait ScaldingPipelineOptions extends PipelineOptions {
-  @Description("The url of hadoop master")
+  @Description("Pipeline name")
+  @Required
+  def getName: String
+
+  @Description("Scalding mode")
   @Default.String("local")
-  def getMasterUrl: String
-  def setMasterUrl(value: String)
+  def getMode: String
+
+  def setName(value: String)
+  def setMode(value: String)
 }

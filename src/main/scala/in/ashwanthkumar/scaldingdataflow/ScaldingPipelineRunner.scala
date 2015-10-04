@@ -2,6 +2,7 @@ package in.ashwanthkumar.scaldingdataflow
 
 import cascading.flow.FlowDef
 import com.google.cloud.dataflow.sdk.PipelineResult.State
+import com.google.cloud.dataflow.sdk.options.PipelineOptions
 import com.google.cloud.dataflow.sdk.runners.{AggregatorValues, PipelineRunner, TransformTreeNode}
 import com.google.cloud.dataflow.sdk.transforms.{Aggregator, PTransform}
 import com.google.cloud.dataflow.sdk.values.PValue
@@ -28,10 +29,16 @@ class Evaluator(var ctx: SContext) extends Pipeline.PipelineVisitor {
   override def visitValue(value: PValue, producer: TransformTreeNode): Unit = {}
 }
 
-class ScaldingPipelineRunner(name: String, @transient ctx: SContext) extends PipelineRunner[ScaldingResult] {
+class ScaldingPipelineRunner(options: ScaldingPipelineOptions) extends PipelineRunner[ScaldingResult] {
   private val LOG = LoggerFactory.getLogger(classOf[ScaldingPipelineRunner])
 
   override def run(pipeline: Pipeline): ScaldingResult = {
+
+    val ctx = options.getMode match {
+      case "local" => SContext.local(options.getName)
+      case "hdfs" => SContext.hdfs(options.getName)
+    }
+
     pipeline.traverseTopologically(new Evaluator(ctx))
 
     new Job(Args(Iterable())) {
@@ -45,6 +52,5 @@ class ScaldingPipelineRunner(name: String, @transient ctx: SContext) extends Pip
 }
 
 object ScaldingPipelineRunner {
-  def local(name: String) = new ScaldingPipelineRunner(name, SContext.local(name))
-  def hdfs(name: String) = new ScaldingPipelineRunner(name, SContext.hdfs(name))
+  def fromOptions(options: PipelineOptions) = new ScaldingPipelineRunner(options.as(classOf[ScaldingPipelineOptions]))
 }
