@@ -49,6 +49,7 @@ ScaldingRunner.hdfs("Test Pipeline on Hadoop Cluster").run(pipeline)
 - [x] KvSwap
 - [ ] ParDo.Bound with sideInputs
 - [ ] Combine
+- [ ] Flatten
 
 ### IO
 - [x] Text
