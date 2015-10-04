@@ -4,8 +4,8 @@ import cascading.flow.FlowDef
 import com.google.cloud.dataflow.sdk.PipelineResult.State
 import com.google.cloud.dataflow.sdk.options.PipelineOptions
 import com.google.cloud.dataflow.sdk.runners.{AggregatorValues, PipelineRunner, TransformTreeNode}
-import com.google.cloud.dataflow.sdk.transforms.{AppliedPTransform, Aggregator, PTransform}
-import com.google.cloud.dataflow.sdk.values.{POutput, PInput, PValue}
+import com.google.cloud.dataflow.sdk.transforms.{Aggregator, AppliedPTransform, PTransform}
+import com.google.cloud.dataflow.sdk.values.{PInput, POutput, PValue}
 import com.google.cloud.dataflow.sdk.{Pipeline, PipelineResult}
 import com.twitter.scalding.{Args, Job, Mode}
 import org.slf4j.LoggerFactory
