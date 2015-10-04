@@ -29,6 +29,7 @@ object Build extends Build {
   )
 
   lazy val publishSettings = xerial.sbt.Sonatype.sonatypeSettings ++ Seq(
+    pomIncludeRepository := { _ => true },
     publishMavenStyle := true,
     publishArtifact in Test := false,
     publishArtifact in(Compile, packageDoc) := true,
