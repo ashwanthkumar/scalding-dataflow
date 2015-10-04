@@ -8,24 +8,25 @@ Pass the following options to the program (_WordCount_) when running it
 
 `--runner=ScaldingPipelineRunner --name=Main-Test --mode=local`
 
-```scala
-  val withOptions = PipelineOptionsFactory
+```java
+  PipelineOptions options = PipelineOptionsFactory
     .fromArgs(args)
     .withValidation()
-    .create()
-  val pipeline = Pipeline.create(withOptions)
-  pipeline
-    .apply(TextIO.Read.from("kinglear.txt").named("Source"))
-    .apply(ParDo.named("convert-to-length").of[String, Integer](new DoFn[String, Integer]() {
-    override def processElement(c: DoFn[String, Integer]#ProcessContext): Unit = c.output(c.element().length)
-  }))
-    .apply(Filter.greaterThan[Integer](10))
-    .apply(ParDo.named("to-string").of[Integer, String](new DoFn[Integer, String]() {
-    override def processElement(c: DoFn[Integer, String]#ProcessContext): Unit = c.output(c.element().toString)
-  }))
-    .apply(TextIO.Write.to("out.txt").named("Sink"))
+    .create();
+  Pipeline pipeline = Pipeline.create(options);
 
-  pipeline.run()
+  pipeline.apply(TextIO.Read.from("kinglear.txt").named("Source"))
+    .apply(Count.<String>perElement())
+    .apply(ParDo.of(new DoFn<KV<String, Long>, String>() {
+      @Override
+      public void processElement(ProcessContext c) throws Exception {
+        KV<String, Long> kv = c.element();
+        c.output(String.format("%s\t%d", kv.getKey(), kv.getValue()));
+      }
+    }))
+    .apply(TextIO.Write.to("out.txt").named("Sink"));
+
+  pipeline.run();
 ```
 
 If you want to run it on HDFS, change the `mode=local` to `mode=hdfs`
