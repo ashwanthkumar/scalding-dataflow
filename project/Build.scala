@@ -6,9 +6,8 @@ object Build extends Build {
   val AppVersion = System.getenv().getOrElse("GO_PIPELINE_LABEL", "1.0.0-SNAPSHOT")
   val ScalaVersion = "2.10.4"
 
-  val main = Project("scalding-dataflow", file("."))
-    .settings(organization := "in.ashwanthkumar",
-      version := AppVersion,
+  lazy val main = Project("scalding-dataflow", file("."), settings = defaultSettings ++ publishSettings)
+    .settings(
       libraryDependencies ++= appDependencies
     )
 
@@ -17,7 +16,9 @@ object Build extends Build {
   lazy val appDependencies = Seq(scalding, dataflow, hadoopClient,
     scalaTest, mockito)
 
-  override val settings = super.settings ++ Seq(
+  lazy val defaultSettings = Seq(
+    organization := "in.ashwanthkumar",
+    version := AppVersion,
     fork in run := false,
     parallelExecution in This := false,
 
@@ -25,10 +26,9 @@ object Build extends Build {
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += "Conjars" at "http://conjars.org/repo",
     resolvers += "Cloudera" at "https://repository.cloudera.com/cloudera/public"
-  ) ++ publishSettings
+  )
 
   lazy val publishSettings = xerial.sbt.Sonatype.sonatypeSettings ++ Seq(
-    mappings in (Compile, packageBin) ~= (_.filterNot{case (file, _) => file.isDirectory && file.getName == "kinglear.txt"}),
     publishMavenStyle := true,
     publishArtifact in Test := false,
     publishArtifact in(Compile, packageDoc) := true,
@@ -38,7 +38,7 @@ object Build extends Build {
       if (v.trim.endsWith("SNAPSHOT"))
         Some("snapshots" at nexus + "content/repositories/snapshots")
       else
-        Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+        Some("releases" at nexus + "service/local/staging/deploy/maven2")
     },
     pomExtra := _pomExtra
   )
