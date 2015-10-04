@@ -4,6 +4,41 @@
 Scalding Runner for Google Dataflow SDK. This project is a WIP, try it at your own risk.
 
 ## Usage
+
+You can use it in your own SBT projects
+### built.sbt
+```sbt
+resolvers += Resolver.sonatypeRepo("snapshots")
+
+// For more updated version check out the last run version of Build pipeline
+libraryDependencies += "in.ashwanthkumar" %% "scalding-dataflow" % "1.0.23-SNAPSHOT"
+```
+
+### pom.xml
+```xml
+  <dependency>
+    <groupId>in.ashwanthkumar</groupId>
+    <artifactId>scalding-dataflow_2.10</artifactId>
+    <!-- For more updated version check out the last run version of Build pipeline -->
+    <version>1.0.23</version>
+  </dependency>
+
+  ....
+
+  <repositories>
+    <repository>
+      <id>oss.sonatype.org-snapshot</id>
+      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+```
+
 Pass the following options to the program (_WordCount_) when running it
 
 `--runner=ScaldingPipelineRunner --name=Main-Test --mode=local`
