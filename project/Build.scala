@@ -25,7 +25,7 @@ object Build extends Build {
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += "Conjars" at "http://conjars.org/repo",
     resolvers += "Cloudera" at "https://repository.cloudera.com/cloudera/public"
-  )
+  ) ++ publishSettings
 
   lazy val publishSettings = xerial.sbt.Sonatype.sonatypeSettings ++ Seq(
     mappings in (Compile, packageBin) ~= (_.filterNot{case (file, _) => file.isDirectory && file.getName == "kinglear.txt"}),
