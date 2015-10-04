@@ -18,8 +18,19 @@ public class WordCount {
         Pipeline pipeline = Pipeline.create(options);
 
         pipeline.apply(TextIO.Read.from("kinglear.txt").named("Source"))
+            .apply(ParDo.named("splitter").of(new DoFn<String, String>() {
+                @Override
+                public void processElement(ProcessContext c) throws Exception {
+                String[] words = c.element().split("[^a-zA-Z']+");
+                for (String word : words) {
+                    if (!word.isEmpty()) {
+                        c.output(word);
+                    }
+                }
+            }
+            }))
             .apply(Count.<String>perElement())
-            .apply(ParDo.of(new DoFn<KV<String, Long>, String>() {
+            .apply(ParDo.named("to-tsv").of(new DoFn<KV<String, Long>, String>() {
                 @Override
                 public void processElement(ProcessContext c) throws Exception {
                     KV<String, Long> kv = c.element();
