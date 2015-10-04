@@ -52,6 +52,7 @@ If you want to run it on HDFS (not tested yet), change the `mode=local` to `mode
 - [x] Text
 - [ ] Custom Cascading Scheme
 - [ ] Iterable of Items
+- [ ] Google SDK's Coder for SerDe
 
 ### Scalding
 - [x] Move to TypedPipes
