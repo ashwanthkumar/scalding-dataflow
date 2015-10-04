@@ -54,3 +54,6 @@ Scalding Runner for Google Dataflow SDK. This project is a WIP, try it at your o
 - [ ] Parquet
 - [ ] Custom Cascading Scheme
 - [ ] Iterable of Items
+
+### Scalding
+- [ ] Move to TypedPipes
