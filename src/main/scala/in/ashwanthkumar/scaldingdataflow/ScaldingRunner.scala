@@ -28,11 +28,10 @@ class Evaluator(var ctx: SContext) extends Pipeline.PipelineVisitor {
   override def visitValue(value: PValue, producer: TransformTreeNode): Unit = {}
 }
 
-class LocalScaldingRunner(name: String) extends PipelineRunner[ScaldingResult] {
-  private val LOG = LoggerFactory.getLogger(classOf[LocalScaldingRunner])
+class ScaldingRunner(name: String, @transient ctx: SContext) extends PipelineRunner[ScaldingResult] {
+  private val LOG = LoggerFactory.getLogger(classOf[ScaldingRunner])
 
   override def run(pipeline: Pipeline): ScaldingResult = {
-    val ctx = SContext.local("init")
     pipeline.traverseTopologically(new Evaluator(ctx))
 
     new Job(Args(Iterable())) {
@@ -46,5 +45,6 @@ class LocalScaldingRunner(name: String) extends PipelineRunner[ScaldingResult] {
 }
 
 object ScaldingRunner {
-  def local(name: String) = new LocalScaldingRunner(name)
+  def local(name: String) = new ScaldingRunner(name, SContext.local(name))
+  def hdfs(name: String) = new ScaldingRunner(name, SContext.hdfs(name))
 }
