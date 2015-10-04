@@ -3,10 +3,9 @@ Scalding Runner for Google Dataflow SDK. This project is a WIP.
 
 ## Todos
 ### Translators
-- [ ] map 
-- [ ] flatMap 
-- [ ] filter
-- [ ] groupBy
+- [x] ParDo.Bound
+- [ ] ParDo.Bound with sideInputs
+- [ ] Combine
 
 ### IO
 - [x] Text
