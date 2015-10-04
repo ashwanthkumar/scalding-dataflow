@@ -1,3 +1,5 @@
+[![Build Status](https://snap-ci.com/ashwanthkumar/scalding-dataflow/branch/master/build_image)](https://snap-ci.com/ashwanthkumar/scalding-dataflow/branch/master)
+
 # scalding-dataflow
 Scalding Runner for Google Dataflow SDK. This project is a WIP, try it at your own risk.
 
