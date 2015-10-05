@@ -7,7 +7,7 @@ import com.google.cloud.dataflow.sdk.runners.{AggregatorValues, PipelineRunner, 
 import com.google.cloud.dataflow.sdk.transforms.{Aggregator, AppliedPTransform, PTransform}
 import com.google.cloud.dataflow.sdk.values.{PInput, POutput, PValue}
 import com.google.cloud.dataflow.sdk.{Pipeline, PipelineResult}
-import com.twitter.scalding.{Args, Job, Mode}
+import com.twitter.scalding.{Config, Args, Job, Mode}
 import org.slf4j.LoggerFactory
 
 class ScaldingResult extends PipelineResult {
@@ -38,8 +38,8 @@ class ScaldingPipelineRunner(options: ScaldingPipelineOptions) extends PipelineR
   override def run(pipeline: Pipeline): ScaldingResult = {
 
     val ctx = options.getMode match {
-      case "local" => SContext.local(options.getName, options)
-      case "hdfs" => SContext.hdfs(options.getName, options)
+      case "local" => SContext.local(options.getAppName, options)
+      case "hdfs" => SContext.hdfs(options.getAppName, options)
       case _ =>
         throw new RuntimeException("--mode has to be one of local or hdfs")
     }
