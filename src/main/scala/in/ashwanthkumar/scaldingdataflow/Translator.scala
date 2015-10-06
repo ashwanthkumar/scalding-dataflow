@@ -42,9 +42,11 @@ object Translator {
   def flatMap[I, O]() = new TransformEvaluator[ParDo.Bound[I, O]] {
     override def evaluate(appliedPTransform: AppliedPTransform[_, _, ParDo.Bound[I, O]], transform: ParDo.Bound[I, O], ctx: SContext): SContext = {
       val value = ctx.getInput[PValue](appliedPTransform)
+      val sideInputs = getSideInputs(transform.getSideInputs, ctx)
+      val runtimeCtx = ctx.runtimeCtx
       ctx.addOutput(appliedPTransform,
         ctx.lastPipe(value).apply[I, O](_.flatMap[O] { input: I =>
-          val context = new ProcessContext[I, O](transform.getFn, input, sideInputs(transform.getSideInputs, ctx), ctx.pipelineOptions)
+          val context = new ProcessContext[I, O](transform.getFn, input, sideInputs, runtimeCtx)
           transform.getFn.startBundle(context.asInstanceOf[DoFn[I, O]#Context])
           transform.getFn.processElement(context.asInstanceOf[DoFn[I, O]#ProcessContext])
           transform.getFn.finishBundle(context.asInstanceOf[DoFn[I, O]#Context])
@@ -53,7 +55,7 @@ object Translator {
       )
     }
 
-    def sideInputs(sideInputs: JList[PCollectionView[_]], ctx: SContext): JMap[TupleTag[_], JIterable[WindowedValue[_]]] = {
+    def getSideInputs(sideInputs: JList[PCollectionView[_]], ctx: SContext): JMap[TupleTag[_], JIterable[WindowedValue[_]]] = {
       val map = Maps.newHashMap[TupleTag[_], JIterable[WindowedValue[_]]]()
       if (sideInputs != null) {
         sideInputs.asScala

@@ -20,12 +20,12 @@ public class ProcessContext<Input, Output> extends ScaldingContextWrapper<Input,
 
     private List<Output> outputs = Lists.newArrayList();
     private Map<TupleTag<?>, Iterable<WindowedValue<?>>> sideInputs;
-    private PipelineOptions options;
+    private RuntimeContext context;
 
-    public ProcessContext(DoFn<Input, Output> fn, Input element, Map<TupleTag<?>, Iterable<WindowedValue<?>>> sideInputs, PipelineOptions options) {
+    public ProcessContext(DoFn<Input, Output> fn, Input element, Map<TupleTag<?>, Iterable<WindowedValue<?>>> sideInputs, RuntimeContext options) {
         super(fn, element);
         this.sideInputs = sideInputs;
-        this.options = options;
+        this.context = options;
     }
 
     public Iterable<Output> getOutput() {
@@ -34,7 +34,7 @@ public class ProcessContext<Input, Output> extends ScaldingContextWrapper<Input,
 
     @Override
     public PipelineOptions getPipelineOptions() {
-        return options;
+        return context.pipelineOptions();
     }
 
     @Override

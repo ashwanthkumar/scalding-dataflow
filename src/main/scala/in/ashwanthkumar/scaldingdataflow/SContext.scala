@@ -26,11 +26,15 @@ object SPipe {
   def apply[T](iterable: Iterable[T]): SPipe = SPipe(TypedPipe.from[T](iterable))
 }
 
+case class RuntimeContext(serializedPipelineOptions: String) {
+  def pipelineOptions: PipelineOptions = JSON.fromJson(serializedPipelineOptions, classOf[PipelineOptions])
+}
+
 case class SContext(pipes: Map[PValue, SPipe],
                     @transient flowDef: FlowDef,
                     mode: Mode,
                     name: String,
-                    pipelineOptionsInJson: String,
+                    serializedPipelineOptions: String,
                     views: Map[PValue, JIterable[WindowedValue[_]]] = Map()) {
   def apply(pValue: PValue, transformed: SPipe) = {
     // println("Adding " + pValue + " to known maps")
@@ -66,7 +70,7 @@ case class SContext(pipes: Map[PValue, SPipe],
   def getInput[T](applied: AppliedPTransform[_, _, _]) = applied.getInput.asInstanceOf[T]
   def getOutput[T](applied: AppliedPTransform[_, _, _]) = applied.getOutput.asInstanceOf[T]
 
-  def pipelineOptions: PipelineOptions = JSON.fromJson(pipelineOptionsInJson, classOf[PipelineOptions])
+  def runtimeCtx = RuntimeContext(serializedPipelineOptions)
 }
 
 object SContext {
