@@ -64,7 +64,7 @@ Pass the following options to the program (_WordCount_) when running it
   pipeline.run();
 ```
 
-If you want to run it on HDFS (not tested yet), change the `mode=local` to `mode=hdfs`
+If you want to run it on HDFS (experimental), change the `mode=local` to `mode=hdfs`
 
 ## Todos
 ### Translators
