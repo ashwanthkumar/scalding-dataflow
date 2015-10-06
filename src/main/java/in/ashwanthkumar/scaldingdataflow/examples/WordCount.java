@@ -29,7 +29,6 @@ public class WordCount {
         Options options = PipelineOptionsFactory
                 .fromArgs(args)
                 .withValidation()
-                .create()
                 .as(Options.class);
         Pipeline pipeline = Pipeline.create(options);
 
