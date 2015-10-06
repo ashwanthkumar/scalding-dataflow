@@ -3,6 +3,7 @@ package in.ashwanthkumar.scaldingdataflow
 import java.lang.{Iterable => JIterable}
 
 import cascading.flow.FlowDef
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.cloud.dataflow.sdk.options.PipelineOptions
 import com.google.cloud.dataflow.sdk.transforms.AppliedPTransform
 import com.google.cloud.dataflow.sdk.util.WindowedValue
@@ -12,7 +13,7 @@ import com.twitter.scalding.{Hdfs, Local, Mode}
 import org.apache.hadoop.conf.Configuration
 
 
-case class SPipe(pipe: TypedPipe[_]) {
+case class SPipe(@transient pipe: TypedPipe[_]) {
   def apply[I, O](transformed: TypedPipe[I] => TypedPipe[O]) = this.copy(pipe = transformed(pipe.asInstanceOf[TypedPipe[I]]))
 
   def ++(another: SPipe) = SPipe(pipe = this.pipe ++ another.pipe)
@@ -25,8 +26,11 @@ object SPipe {
   def apply[T](iterable: Iterable[T]): SPipe = SPipe(TypedPipe.from[T](iterable))
 }
 
-case class SContext(pipes: Map[PValue, SPipe], flowDef: FlowDef, mode: Mode, name: String,
-                    pipelineOptions: PipelineOptions,
+case class SContext(pipes: Map[PValue, SPipe],
+                    @transient flowDef: FlowDef,
+                    mode: Mode,
+                    name: String,
+                    pipelineOptionsInJson: String,
                     views: Map[PValue, JIterable[WindowedValue[_]]] = Map()) {
   def apply(pValue: PValue, transformed: SPipe) = {
     // println("Adding " + pValue + " to known maps")
@@ -61,9 +65,17 @@ case class SContext(pipes: Map[PValue, SPipe], flowDef: FlowDef, mode: Mode, nam
 
   def getInput[T](applied: AppliedPTransform[_, _, _]) = applied.getInput.asInstanceOf[T]
   def getOutput[T](applied: AppliedPTransform[_, _, _]) = applied.getOutput.asInstanceOf[T]
+
+  def pipelineOptions: PipelineOptions = JSON.fromJson(pipelineOptionsInJson, classOf[PipelineOptions])
 }
 
 object SContext {
-  def local(name: String, options: PipelineOptions) = SContext(Map(), FlowDef.flowDef(), Local(false), name, options)
-  def hdfs(name: String, options: PipelineOptions) = SContext(Map(), FlowDef.flowDef(), Hdfs(strict = false, new Configuration), name, options)
+  def local(name: String, options: PipelineOptions) = SContext(Map(), FlowDef.flowDef(), Local(false), name, JSON.toJson(options))
+  def hdfs(name: String, options: PipelineOptions) = SContext(Map(), FlowDef.flowDef(), Hdfs(strict = false, new Configuration), name, JSON.toJson(options))
+}
+
+object JSON {
+  private val mapper = new ObjectMapper()
+  def toJson(o: Any) = mapper.writeValueAsString(o)
+  def fromJson[T](json: String, clazz: Class[T]): T = mapper.readValue(json, clazz)
 }
