@@ -70,8 +70,8 @@ case class SContext(pipes: Map[PValue, SPipe],
 }
 
 object SContext {
-  def local(name: String, options: PipelineOptions) = SContext(Map(), FlowDef.flowDef(), Local(false), name, JSON.toJson(options))
-  def hdfs(name: String, options: PipelineOptions) = SContext(Map(), FlowDef.flowDef(), Hdfs(strict = false, new Configuration), name, JSON.toJson(options))
+  def local(name: String, options: PipelineOptions) = SContext(Map(), FlowDef.flowDef().setName(name), Local(false), name, JSON.toJson(options))
+  def hdfs(name: String, options: PipelineOptions) = SContext(Map(), FlowDef.flowDef().setName(name), Hdfs(strict = false, new Configuration), name, JSON.toJson(options))
 }
 
 object JSON {
