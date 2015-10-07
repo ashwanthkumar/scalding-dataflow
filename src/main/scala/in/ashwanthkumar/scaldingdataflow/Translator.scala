@@ -5,7 +5,7 @@ import java.util.{List => JList, Map => JMap}
 
 import com.google.cloud.dataflow.sdk.io.TextIO.Read.{Bound => RBound}
 import com.google.cloud.dataflow.sdk.io.TextIO.Write.{Bound => WBound}
-import com.google.cloud.dataflow.sdk.transforms.Combine.CombineFn
+import com.google.cloud.dataflow.sdk.transforms.Combine.{CombineFn, GroupedValues}
 import com.google.cloud.dataflow.sdk.transforms.Flatten.FlattenPCollectionList
 import com.google.cloud.dataflow.sdk.transforms.View.CreatePCollectionView
 import com.google.cloud.dataflow.sdk.transforms._
@@ -92,6 +92,17 @@ object Translator {
     }
   }
 
+  val COMBINE_GROUPED = new FieldGetter(classOf[Combine.GroupedValues[_, _, _]])
+  def grouped[K, VI, VO]() = new TransformEvaluator[Combine.GroupedValues[K, VI, VO]] {
+    override def evaluate(appliedPTransform: AppliedPTransform[_, _, GroupedValues[K, VI, VO]], transform: GroupedValues[K, VI, VO], ctx: SContext): SContext = {
+      val value = ctx.getInput[PValue](appliedPTransform)
+      val fn = COMBINE_GROUPED.get[Combine.KeyedCombineFn[K, VI, _, VO]]("fn", transform)
+      ctx.addOutput(appliedPTransform,
+        ctx.lastPipe(value).apply[KV[K, JIterable[VI]], KV[K, VO]](_.map(kv => KV.of(kv.getKey, fn.apply(kv.getKey, kv.getValue))))
+      )
+    }
+  }
+
   val COMBINE_FIELDS = new FieldGetter(classOf[Combine.Globally[_, _]])
   def aggregate[I, A, O]() = new TransformEvaluator[Combine.Globally[I, O]] {
     override def evaluate(appliedPTransform: AppliedPTransform[_, _, Combine.Globally[I, O]], transform: Combine.Globally[I, O], ctx: SContext): SContext = {
@@ -135,6 +146,7 @@ object Translator {
     classOf[ParDo.Bound[_, _]] -> flatMap(),
     classOf[GroupByKey.GroupByKeyOnly[_, _]] -> groupByKeyOnly(),
     classOf[Combine.Globally[_, _]] -> aggregate(),
+    classOf[Combine.GroupedValues[_, _, _]] -> grouped(),
     classOf[View.CreatePCollectionView[_, _]] -> createPCollView(),
     classOf[Create.Values[_]] -> create(),
     classOf[Flatten.FlattenPCollectionList[_]] -> flattenPColl()
