@@ -103,11 +103,11 @@ object Translator {
     }
   }
 
-  val COMBINE_FIELDS = new FieldGetter(classOf[Combine.Globally[_, _]])
+  val COMBINE_GLOBALLY = new FieldGetter(classOf[Combine.Globally[_, _]])
   def aggregate[I, A, O]() = new TransformEvaluator[Combine.Globally[I, O]] {
     override def evaluate(appliedPTransform: AppliedPTransform[_, _, Combine.Globally[I, O]], transform: Combine.Globally[I, O], ctx: SContext): SContext = {
       val value = ctx.getInput[PValue](appliedPTransform)
-      val fn = COMBINE_FIELDS.get[CombineFn[I, A, O]]("fn", transform)
+      val fn = COMBINE_GLOBALLY.get[CombineFn[I, A, O]]("fn", transform)
       val acc = fn.createAccumulator()
       ctx.addOutput(appliedPTransform,
         ctx.lastPipe(value).apply[I, O](_.aggregate[A, O](new TAggregator[I, A, O]() {
@@ -121,11 +121,11 @@ object Translator {
     }
   }
 
-  val COMBINE_PER_KEY_FIELDS = new FieldGetter(classOf[Combine.PerKey[_, _, _]])
+  val COMBINE_PER_KEY = new FieldGetter(classOf[Combine.PerKey[_, _, _]])
   def combinePerKey[K, VI, VA, VO]() = new TransformEvaluator[Combine.PerKey[K, VI, VO]] {
     override def evaluate(appliedPTransform: AppliedPTransform[_, _, Combine.PerKey[K, VI, VO]], transform: Combine.PerKey[K, VI, VO], ctx: SContext): SContext = {
       val value = ctx.getInput[PValue](appliedPTransform)
-      val fn = COMBINE_PER_KEY_FIELDS.get[Combine.KeyedCombineFn[K, VI, VA, VO]]("fn", transform)
+      val fn = COMBINE_PER_KEY.get[Combine.KeyedCombineFn[K, VI, VA, VO]]("fn", transform)
       ctx.addOutput(appliedPTransform,
         ctx.lastPipe(value).apply[KV[K, VI], KV[K, VO]](_.groupBy(input => input.getKey)
         .aggregate(new TAggregator[KV[K, VI], KV[K,VA], VO]() {
