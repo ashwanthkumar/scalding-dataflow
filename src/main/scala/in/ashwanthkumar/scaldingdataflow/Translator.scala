@@ -173,6 +173,7 @@ object Translator {
     classOf[GroupByKey.GroupByKeyOnly[_, _]] -> groupByKeyOnly(),
     classOf[Combine.Globally[_, _]] -> aggregate(),
     classOf[Combine.GroupedValues[_, _, _]] -> grouped(),
+    classOf[Combine.PerKey[_, _, _]] -> combinePerKey(),
     classOf[View.CreatePCollectionView[_, _]] -> createPCollView(),
     classOf[Create.Values[_]] -> create(),
     classOf[Flatten.FlattenPCollectionList[_]] -> flattenPColl()
