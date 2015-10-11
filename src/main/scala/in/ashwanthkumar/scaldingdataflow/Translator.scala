@@ -122,7 +122,7 @@ object Translator {
   }
 
   val COMBINE_PER_KEY = new FieldGetter(classOf[Combine.PerKey[_, _, _]])
-  def combinePerKey[K, VI, VA, VO]() = new TransformEvaluator[Combine.PerKey[K, VI, VO]] {
+  def combinePerKey[K <: Ordered[K], VI, VA, VO]() = new TransformEvaluator[Combine.PerKey[K, VI, VO]] {
     override def evaluate(appliedPTransform: AppliedPTransform[_, _, Combine.PerKey[K, VI, VO]], transform: Combine.PerKey[K, VI, VO], ctx: SContext): SContext = {
       val value = ctx.getInput[PValue](appliedPTransform)
       val fn = COMBINE_PER_KEY.get[Combine.KeyedCombineFn[K, VI, VA, VO]]("fn", transform)
