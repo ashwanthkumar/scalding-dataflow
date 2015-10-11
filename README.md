@@ -78,7 +78,7 @@ If you want to run it on HDFS (experimental), change the `mode=local` to `mode=h
 - [x] Flatten
 - [ ] ParDo.BoundMulti
 - [x] Combine.GroupedValues
-- [ ] Combine.PerKey
+- [x] Combine.PerKey
 - [ ] View.AsSingleton
 - [ ] View.AsIterable
 - [ ] Window.Bound

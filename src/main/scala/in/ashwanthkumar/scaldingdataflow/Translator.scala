@@ -121,6 +121,32 @@ object Translator {
     }
   }
 
+  val COMBINE_PER_KEY_FIELDS = new FieldGetter(classOf[Combine.PerKey[_, _, _]])
+  def combinePerKey[K, VI, VA, VO]() = new TransformEvaluator[Combine.PerKey[K, VI, VO]] {
+    override def evaluate(appliedPTransform: AppliedPTransform[_, _, Combine.PerKey[K, VI, VO]], transform: Combine.PerKey[K, VI, VO], ctx: SContext): SContext = {
+      val value = ctx.getInput[PValue](appliedPTransform)
+      val fn = COMBINE_PER_KEY_FIELDS.get[Combine.KeyedCombineFn[K, VI, VA, VO]]("fn", transform)
+      ctx.addOutput(appliedPTransform,
+        ctx.lastPipe(value).apply[KV[K, VI], KV[K, VO]](_.groupBy(input => input.getKey)
+        .aggregate(new TAggregator[KV[K, VI], KV[K,VA], VO]() {
+          override def prepare(input: KV[K, VI]): KV[K, VA] = {
+            val acc = fn.createAccumulator(input.getKey)
+            fn.addInput(input.getKey, acc, input.getValue)
+            KV.of(input.getKey, acc)
+          }
+          override def semigroup: Semigroup[KV[K, VA]] = new Semigroup[KV[K, VA]] {
+            override def plus(l: KV[K, VA], r: KV[K, VA]): KV[K, VA] = {
+              val key = l.getKey // since both the keys are going to be the same
+              val mergedAcc = fn.mergeAccumulators(l.getKey, Iterable(l.getValue, r.getValue).asJava)
+              KV.of(l.getKey, mergedAcc)
+            }
+          }
+          override def present(reduction: KV[K, VA]): VO = fn.extractOutput(reduction.getKey, reduction.getValue)
+        }).mapGroup((key, values) => values.map(v => KV.of(key, v))).values)
+      )
+    }
+  }
+
   def createPCollView[Record, View]() = new TransformEvaluator[View.CreatePCollectionView[Record, View]] {
     override def evaluate(appliedPTransform: AppliedPTransform[_, _, View.CreatePCollectionView[Record, View]], transform: CreatePCollectionView[Record, View], ctx: SContext): SContext = {
       val value = ctx.getInput[PValue](appliedPTransform)
